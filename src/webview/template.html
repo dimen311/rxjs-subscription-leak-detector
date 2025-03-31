@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RxJS Subscription Leak Report</title>
+    <!-- Styles will be injected by the extension -->
+</head>
+<body>
+    <h1>RxJS Subscription Leak Analysis</h1>
+    
+    <div id="summary" class="summary">
+        <div id="leaks-count">Loading...</div>
+    </div>
+
+    <table id="leaks-table">
+        <thead>
+            <tr>
+                <th>Component</th>
+                <th>File</th>
+                <th>Line</th>
+                <th>Variable</th>
+                <th>Has OnDestroy</th>
+            </tr>
+        </thead>
+        <tbody id="leaks-tbody">
+            <!-- Table rows will be inserted here by JavaScript -->
+        </tbody>
+    </table>
+
+    <!-- Script will be injected by the extension -->
+</body>
+</html>

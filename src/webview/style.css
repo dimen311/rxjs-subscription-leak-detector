@@ -1,0 +1,45 @@
+body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    color: var(--vscode-foreground);
+    background-color: var(--vscode-editor-background);
+}
+h1 {
+    color: var(--vscode-titleBar-activeForeground);
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 20px;
+}
+th, td {
+    text-align: left;
+    padding: 8px;
+    border: 1px solid var(--vscode-editorWidget-border);
+}
+th {
+    background-color: var(--vscode-editor-lineHighlightBackground);
+    font-weight: bold;
+}
+tr:hover {
+    background-color: var(--vscode-list-hoverBackground);
+}
+.file-link {
+    color: var(--vscode-textLink-foreground);
+    text-decoration: underline;
+    cursor: pointer;
+}
+.summary {
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: var(--vscode-editorInfo-background);
+    border-left: 4px solid var(--vscode-infoButton-background);
+}
+.no-leaks {
+    color: var(--vscode-gitDecoration-addedResourceForeground);
+    font-weight: bold;
+}
+.has-leaks {
+    color: var(--vscode-gitDecoration-untrackedResourceForeground);
+    font-weight: bold;
+}
