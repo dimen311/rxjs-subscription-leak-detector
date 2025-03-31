@@ -7,8 +7,21 @@
     "vscode": "^1.98.0"
   },
   "categories": [
-    "Other"
+    "Programming Languages"
   ],
+  "keywords": [
+    "html",
+    "angular",
+    "rxjs",
+    "subscription",
+    "subscribe",
+    "unsubscribe",
+    "leak"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dimen311/rxjs-subscription-leak-detector.git"
+  },
   "activationEvents": ["onCommand:rxjs-subscription-detector.findLeaks"],
   "main": "./dist/extension.js",
   "contributes": {
