@@ -3,7 +3,7 @@
 A VS Code extension that helps you identify potential memory leaks caused by unsubscribed RxJS observables in Angular applications.
 
   <br>
-    <img src="https://raw.githubusercontent.com/dimen311/rxjs-subscription-leak-detector/refs/heads/master/rxjs-subscription-leak-detector.gif" alt="logo" width="100%">
+    <img src="https://raw.githubusercontent.com/dimen311/rxjs-subscription-leak-detector/refs/heads/master/rxjs-subscription-detector.gif" alt="logo" width="100%">
   <br>
 
 ## Features

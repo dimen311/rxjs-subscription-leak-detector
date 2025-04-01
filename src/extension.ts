@@ -52,7 +52,7 @@ export function activate(context: vscode.ExtensionContext) {
 			  });
 
 			// Show results
-			showResults(potentialLeaks, context.extensionUri);
+			showResults(potentialLeaks, context);
 		} catch (error) {
 			vscode.window.showErrorMessage(`Error: ${error}`);
 		}
@@ -61,7 +61,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(disposable);
 }
 
-function showResults(leaks: SubscriptionInfo[], extensionUri: vscode.Uri) {
+function showResults(leaks: SubscriptionInfo[], context: vscode.ExtensionContext) {
 	// If no leaks found
 	if (leaks.length === 0) {
 		vscode.window.showInformationMessage('No potential subscription leaks found!');
@@ -78,15 +78,15 @@ function showResults(leaks: SubscriptionInfo[], extensionUri: vscode.Uri) {
 		{
 			enableScripts: true,
 			localResourceRoots: [
-				vscode.Uri.joinPath(extensionUri, 'src')
+				vscode.Uri.joinPath(context.extensionUri, 'src')
 			]
 		}
 	);
 
 	// Get paths to resources
-	const htmlPath = vscode.Uri.joinPath(extensionUri, 'src', 'webview', 'template.html');
-	const scriptPath = vscode.Uri.joinPath(extensionUri, 'src', 'webview', 'webview.js');
-	const cssPath = vscode.Uri.joinPath(extensionUri, 'src', 'webview', 'style.css');
+	const htmlPath = getResourcePath(context, 'webview', 'template.html');
+	const scriptPath = getResourcePath(context, 'webview', 'webview.js');
+	const cssPath = getResourcePath(context, 'webview', 'style.css');
 
 	// Convert to webview URIs
 	const scriptUri = panel.webview.asWebviewUri(scriptPath);
@@ -146,5 +146,15 @@ function showResults(leaks: SubscriptionInfo[], extensionUri: vscode.Uri) {
 		[]
 	);
 }
+
+// Use a helper function to determine the correct path
+function getResourcePath(context: vscode.ExtensionContext, ...pathSegments: string[]): vscode.Uri {
+	// In development, files are in 'src/webview'
+	// In production, files are in 'dist/webview'
+	const isDevelopment = fs.existsSync(path.join(context.extensionPath, 'src', 'webview'));
+	const basePath = isDevelopment ? 'src' : 'dist';
+	
+	return vscode.Uri.joinPath(context.extensionUri, basePath, ...pathSegments);
+  }
 
 export function deactivate() { }
