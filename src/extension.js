@@ -74,7 +74,7 @@ function activate(context) {
                 leak.fileName = path.basename(leak.file);
             });
             // Show results
-            showResults(potentialLeaks, context.extensionUri);
+            showResults(potentialLeaks, context);
         }
         catch (error) {
             vscode.window.showErrorMessage(`Error: ${error}`);
@@ -82,7 +82,7 @@ function activate(context) {
     });
     context.subscriptions.push(disposable);
 }
-function showResults(leaks, extensionUri) {
+function showResults(leaks, context) {
     // If no leaks found
     if (leaks.length === 0) {
         vscode.window.showInformationMessage('No potential subscription leaks found!');
@@ -92,13 +92,13 @@ function showResults(leaks, extensionUri) {
     const panel = vscode.window.createWebviewPanel('subscriptionLeaks', 'RxJS Subscription Leaks', vscode.ViewColumn.One, {
         enableScripts: true,
         localResourceRoots: [
-            vscode.Uri.joinPath(extensionUri, 'src')
+            vscode.Uri.joinPath(context.extensionUri, 'src')
         ]
     });
     // Get paths to resources
-    const htmlPath = vscode.Uri.joinPath(extensionUri, 'src', 'webview', 'template.html');
-    const scriptPath = vscode.Uri.joinPath(extensionUri, 'src', 'webview', 'webview.js');
-    const cssPath = vscode.Uri.joinPath(extensionUri, 'src', 'webview', 'style.css');
+    const htmlPath = getResourcePath(context, 'webview', 'template.html');
+    const scriptPath = getResourcePath(context, 'webview', 'webview.js');
+    const cssPath = getResourcePath(context, 'webview', 'style.css');
     // Convert to webview URIs
     const scriptUri = panel.webview.asWebviewUri(scriptPath);
     const cssUri = panel.webview.asWebviewUri(cssPath);
@@ -136,6 +136,14 @@ function showResults(leaks, extensionUri) {
             });
         }
     }, undefined, []);
+}
+// Use a helper function to determine the correct path
+function getResourcePath(context, ...pathSegments) {
+    // In development, files are in 'src/webview'
+    // In production, files are in 'dist/webview'
+    const isDevelopment = fs.existsSync(path.join(context.extensionPath, 'src', 'webview'));
+    const basePath = isDevelopment ? 'src' : 'dist';
+    return vscode.Uri.joinPath(context.extensionUri, basePath, ...pathSegments);
 }
 function deactivate() { }
 //# sourceMappingURL=extension.js.map

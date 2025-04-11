@@ -2,7 +2,7 @@
   "name": "rxjs-subscription-detector",
   "displayName": "RxJS Subscription Leak Detector",
   "description": "Detects potential RxJS subscription leaks in Angular applications",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "publisher": "ExtensionDmn",
   "icon": "logo.png",
   "engines": {

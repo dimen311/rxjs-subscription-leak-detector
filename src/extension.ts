@@ -31,7 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 			// Analyze each file
 			for (const file of angularFiles) {
-		     	const fileContent = fs.readFileSync(file, 'utf8');
+				const fileContent = fs.readFileSync(file, 'utf8');
 				const sourceFile = ts.createSourceFile(
 					file,
 					fileContent,
@@ -39,17 +39,17 @@ export function activate(context: vscode.ExtensionContext) {
 					true
 				);
 
-				const componentInfo = fileProcessor.analyzeFile(sourceFile, file, fileContent);
+				const componentInfo = fileProcessor.analyzeFile(sourceFile, file);
 				subscriptionInfo.push(...componentInfo);
 			}
 
 			// Filter to show only potential leaks
 			const potentialLeaks = subscriptionInfo.filter(info => !info.hasUnsubscribe);
 
-			 // Add filename (basename) to each leak
-			 potentialLeaks.forEach(leak => {
+			// Add filename (basename) to each leak
+			potentialLeaks.forEach(leak => {
 				leak.fileName = path.basename(leak.file);
-			  });
+			});
 
 			// Show results
 			showResults(potentialLeaks, context);
@@ -67,8 +67,6 @@ function showResults(leaks: SubscriptionInfo[], context: vscode.ExtensionContext
 		vscode.window.showInformationMessage('No potential subscription leaks found!');
 		return;
 	}
-
-
 
 	// Create a webview to display results
 	const panel = vscode.window.createWebviewPanel(
@@ -153,8 +151,8 @@ function getResourcePath(context: vscode.ExtensionContext, ...pathSegments: stri
 	// In production, files are in 'dist/webview'
 	const isDevelopment = fs.existsSync(path.join(context.extensionPath, 'src', 'webview'));
 	const basePath = isDevelopment ? 'src' : 'dist';
-	
+
 	return vscode.Uri.joinPath(context.extensionUri, basePath, ...pathSegments);
-  }
+}
 
 export function deactivate() { }
