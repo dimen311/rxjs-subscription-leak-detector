@@ -1,33 +1,34 @@
-# Compiled output
-out/
-dist/
-
-# Node.js
+# Node.js dependencies
 node_modules/
 
-# VS Code Extension related
+# All JavaScript files except dist/extension.js
+src/**/*.js
+src/**/*.js.map
+*.d.ts
+
+# Build output
+dist/*
+
+# Log files
+*.log
+
+# Windows files
+Thumbs.db
+
+# VS Code workspace settings
 .vscode/
-.vsix
+.vscode-test/
+
+# VS Code test results
+coverage/
+
+# Yarn
+.yarn/
+yarn-error.log
+
+# npm
+npm-debug.log
+*.tsbuildinfo
 *.vsix
 
-# TypeScript output
-*.js
-*.jsx
-*.d.ts
-*.map
 
-# Yarn related
-yarn.lock
-
-# npm related
-package-lock.json
-
-# Optional: Logs and temporary files
-*.log
-tmp/
-temp/
-.tmp/
-
-
-# Optional: Build artifacts from other tools
-build/
