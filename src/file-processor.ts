@@ -10,7 +10,7 @@ class FileProcessor {
     }
     async findAngularFiles(rootPath: string): Promise<string[]> {
         const angularPattern = new vscode.RelativePattern(rootPath, '**/*.{ts}');
-        const excludePattern = new vscode.RelativePattern(rootPath, '**/node_modules/**');
+        const excludePattern = new vscode.RelativePattern(rootPath, '{**/node_modules/**,**/*.spec.ts,**/*.test.ts}');
 
         const files = await vscode.workspace.findFiles(angularPattern, excludePattern);
 
@@ -32,62 +32,62 @@ class FileProcessor {
             let className = '';
             let implementsOnDestroy = false;
             let hasNgOnDestroyMethod = false;
-            let subscriptionVariables: string[] = [];
-            let subscriptionVarToLineMap = new Map<string, number>();
 
-            function shouldVisitChildren(node: ts.Node): boolean {
-                // Only visit children of these node types
-                return ts.isSourceFile(node) ||
-                    ts.isClassDeclaration(node) ||
-                    ts.isBlock(node) ||
-                    ts.isConstructorDeclaration(node) ||
-                    ts.isMethodDeclaration(node);
-            }
-
-            // Recursion function to visit each node 
-            function visit(node: ts.Node): void {
-                // Quick check for RxJS-related patterns
-                const text = node.getText();
-                if (!text.includes('subscribe') &&
-                    !text.includes('Subscription') &&
-                    !text.includes('OnDestroy') &&
-                    !ts.isClassDeclaration(node)) {
-                    return;
-                }
-
-                // Process only relevant node types
+            // Traverse all nodes recursively to find subscribe calls
+            function visit(node: ts.Node) {
+                // Check for class declaration
                 if (ts.isClassDeclaration(node) && node.name) {
                     className = node.name.getText();
-                    // Check OnDestroy implementation
+
+                    // Check OnDestroy implementation in heritage clauses
                     if (node.heritageClauses) {
                         implementsOnDestroy = node.heritageClauses.some(clause =>
                             clause.token === ts.SyntaxKind.ImplementsKeyword &&
                             clause.types.some(type => type.getText().includes('OnDestroy'))
                         );
                     }
-                } else if (ts.isMethodDeclaration(node) && node.name.getText() === 'ngOnDestroy') {
+                }
+                // Check for ngOnDestroy method
+                else if (ts.isMethodDeclaration(node) && node.name.getText() === 'ngOnDestroy') {
                     hasNgOnDestroyMethod = true;
-                } else if (ts.isPropertyDeclaration(node) && node.type?.getText().includes('Subscription')) {
-                    const varName = node.name.getText();
-                    subscriptionVariables.push(varName);
-                    subscriptionVarToLineMap.set(
-                        varName,
-                        sourceFile.getLineAndCharacterOfPosition(node.getStart()).line + 1
-                    );
-                } else if (ts.isCallExpression(node) &&
-                    node.expression.kind === ts.SyntaxKind.PropertyAccessExpression) {
-                    const propAccess = node.expression as ts.PropertyAccessExpression;
-                    if (propAccess.name.getText() === 'subscribe') {
-                        // Process subscribe call
-                        const linePos = sourceFile.getLineAndCharacterOfPosition(node.getStart());
-                        let variableName = undefined;
+                }
+                // Detection for all subscribe call patterns
+                else if (ts.isCallExpression(node)) {
+                    const expression = node.expression;
 
-                        if (ts.isBinaryExpression(node.parent) &&
-                            node.parent.operatorToken.kind === ts.SyntaxKind.EqualsToken) {
-                            const left = node.parent.left;
-                            variableName = ts.isPropertyAccessExpression(left) ?
-                                left.name.getText() :
-                                ts.isIdentifier(left) ? left.getText() : undefined;
+                    // This handles both direct subscribe() and pipe().subscribe()
+                    if (ts.isPropertyAccessExpression(expression) &&
+                        expression.name.getText() === 'subscribe') {
+
+                        const linePos = sourceFile.getLineAndCharacterOfPosition(node.getStart());
+                        let variableName: string | undefined = undefined;
+
+                        // Check if this subscription is being assigned to a variable or property
+                        let parent = node.parent;
+                        if (parent && ts.isBinaryExpression(parent) &&
+                            parent.operatorToken.kind === ts.SyntaxKind.EqualsToken) {
+                            // This is an assignment (something = observable.subscribe())
+                            const left = parent.left;
+                            if (ts.isIdentifier(left)) {
+                                // Simple variable assignment: sub = observable.subscribe()
+                                variableName = left.getText();
+                            } else if (ts.isPropertyAccessExpression(left)) {
+                                // Property assignment: this.sub = observable.subscribe()
+                                variableName = left.name.getText();
+                            }
+                        } else {
+                            const expressionObject = expression.expression;
+                            const expressionText = expressionObject.getText();
+                            // get string till pipe or subscribe
+                            const pipeIndex = expressionText.indexOf('.pipe');
+                            const subscribeIndex = expressionText.indexOf('.subscribe');
+                            const index = pipeIndex !== -1 ? pipeIndex : subscribeIndex;
+                            if (index !== -1) {
+                                variableName = expressionText.substring(0, index).trim();
+                            } else {
+                                // No assignment found, just a direct subscribe call
+                                variableName = expressionText;
+                            }
                         }
 
                         result.push({
@@ -96,19 +96,19 @@ class FileProcessor {
                             line: linePos.line + 1,
                             column: linePos.character + 1,
                             componentName: className,
-                            variableName,
+                            variableName: variableName,
                             hasUnsubscribe: implementsOnDestroy && hasNgOnDestroyMethod
                         });
                     }
                 }
 
-                // Only traverse children of relevant nodes
-                if (shouldVisitChildren(node)) {
-                    ts.forEachChild(node, visit);
-                }
+                // Continue traversing the AST
+                ts.forEachChild(node, visit);
             }
 
+            // Start the traversal
             visit(sourceFile);
+
             return result;
         } catch (error) {
             console.error(`Error analyzing file ${filePath}:`, error);

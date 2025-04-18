@@ -1,5 +1,33 @@
-out
-dist
-node_modules
-.vscode-test/
+# Compiled output
+out/
+dist/
+
+# Node.js
+node_modules/
+
+# VS Code Extension related
+.vscode/
+.vsix
 *.vsix
+
+# TypeScript output
+*.js
+*.jsx
+*.d.ts
+*.map
+
+# Yarn related
+yarn.lock
+
+# npm related
+package-lock.json
+
+# Optional: Logs and temporary files
+*.log
+tmp/
+temp/
+.tmp/
+
+
+# Optional: Build artifacts from other tools
+build/

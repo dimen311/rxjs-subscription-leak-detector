@@ -75,6 +75,7 @@ function showResults(leaks: SubscriptionInfo[], context: vscode.ExtensionContext
 		vscode.ViewColumn.One,
 		{
 			enableScripts: true,
+			retainContextWhenHidden: true, // Keep webview content when tab is not visible
 			localResourceRoots: [
 				vscode.Uri.joinPath(context.extensionUri, 'src')
 			]
