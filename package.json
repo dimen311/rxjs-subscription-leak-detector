@@ -2,7 +2,7 @@
   "name": "rxjs-subscription-detector",
   "displayName": "RxJS Subscription Leak Detector",
   "description": "Detects potential RxJS subscription leaks in Angular applications",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "publisher": "ExtensionDmn",
   "icon": "logo.png",
   "engines": {
@@ -37,12 +37,17 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
+    "vscode:prepublish": "pnpm run package",
+    "compile": "pnpm run check-types && pnpm run lint && node esbuild.js",
+    "watch": "npm-run-all -p watch:*",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "package": "pnpm run check-types && pnpm run lint && node esbuild.js --production",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
+    "check-types": "tsc --noEmit",
     "lint": "eslint src --ext ts",
-    "package": "vsce package",
-    "postinstall": "rimraf dist/webview && mkdirp dist/webview && ncp src/webview dist/webview",
     "test": "jest",
     "test:watch": "jest --watch"
   },
